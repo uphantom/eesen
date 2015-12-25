@@ -56,6 +56,9 @@ int main(int argc, char *argv[]) {
     int32 report_step=100;
     po.Register("report-step", &report_step, "Step (number of sequences) for status reporting");
 
+    int32 targets_delay=0;
+    po.Register("targets-delay", &targets_delay, "---LSTM--- BPTT targets delay");
+
     std::string use_gpu="yes";
 //    po.Register("use-gpu", &use_gpu, "yes|no|optional, only has effect if compiled with CUDA"); 
 
@@ -149,9 +152,14 @@ int main(int argc, char *argv[]) {
       // Create the final feature matrix. Every utterance is padded to the max length within this group of utterances
       Matrix<BaseFloat> feat_mat_host(cur_sequence_num * max_frame_num, feat_dim, kSetZero);
       for (int s = 0; s < cur_sequence_num; s++) {
-        Matrix<BaseFloat> mat_tmp = feats_utt[s];
+        //Matrix<BaseFloat> mat_tmp = feats_utt[s];
         for (int r = 0; r < frame_num_utt[s]; r++) {
-          feat_mat_host.Row(r*cur_sequence_num + s).CopyFromVec(mat_tmp.Row(r));
+        	if (r + targets_delay < frame_num_utt[s]) {
+        		feat_mat_host.Row(r*cur_sequence_num + s).CopyFromVec(feats_utt[s].Row(r+targets_delay));
+        	}
+        	else{
+        		feat_mat_host.Row(r*cur_sequence_num + s).CopyFromVec(feats_utt[s].Row(frame_num_utt[s]-1));
+        	}
         }
       }        
       // Set the original lengths of utterances before padding

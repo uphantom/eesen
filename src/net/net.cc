@@ -107,6 +107,32 @@ void Net::Backpropagate(const CuMatrixBase<BaseFloat> &out_diff, CuMatrix<BaseFl
   if (NULL != in_diff) (*in_diff) = backpropagate_buf_[0];
 }
 
+std::string Net::InfoPropagate() const {
+  std::ostringstream ostr;
+  // forward-pass buffer stats
+  ostr << "### Forward propagation buffer content :\n";
+  ostr << "[0] output of <Input> " << MomentStatistics(propagate_buf_[0]) << std::endl;
+
+  for (int32 i=0; i<(int32)layers_.size(); i++) {
+    ostr << "["<<1+i<< "] output of "
+         << Layer::TypeToMarker(layers_[i]->GetType())
+         << MomentStatistics(propagate_buf_[i+1]) << std::endl;
+  }
+  return ostr.str();
+}
+
+std::string Net::InfoBackPropagate() const {
+  std::ostringstream ostr;
+  // forward-pass buffer stats
+  ostr << "### Backward propagation buffer content :\n";
+  ostr << "[0] diff of <Input> " << MomentStatistics(backpropagate_buf_[0]) << std::endl;
+  for(int32 i=0; i<(int32)layers_.size(); i++) {
+    ostr << "["<<1+i<< "] diff-output of "
+         << Layer::TypeToMarker(layers_[i]->GetType())
+         << MomentStatistics(backpropagate_buf_[i+1]) << std::endl;
+  }
+  return ostr.str();
+}
 void Net::Feedforward(const CuMatrixBase<BaseFloat> &in, CuMatrix<BaseFloat> *out) {
   KALDI_ASSERT(NULL != out);
 

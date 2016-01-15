@@ -113,6 +113,10 @@ class Net {
   /// Create string with per-layer gradient statistics
   std::string InfoGradient() const;
 
+  std::string InfoPropagate() const;
+
+  std::string InfoBackPropagate() const;
+
   /// Scale the weights
   void Scale(BaseFloat scale);
   /// Add another net to current net
